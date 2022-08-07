@@ -55,11 +55,38 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	id := mux.Vars(r)["id"]
+	var book Book
+	_ = json.NewDecoder(r.Body).Decode(&book)
+	book.ID = id
+
+	for index, item := range books {
+		if item.ID == id {
+			books = append(books[:index], books[index+1:]...)
+			books = append(books, book)
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+
+	w.Write([]byte("Can't find a book with the given id"))
 
 }
 
 func deleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	id := mux.Vars(r)["id"]
 
+	for index, item := range books {
+		if item.ID == id {
+			books = append(books[:index], books[index+1:]...)
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+
+	w.Write([]byte("Can't find a book with the given id"))
 }
 
 func main() {
